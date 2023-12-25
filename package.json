@@ -1,0 +1,22 @@
+{
+  "name": "neuro-to-obsidian",
+  "version": "1.0.0",
+  "description": "Convert neuron zettelkasten to obsidian",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hoschi/neuron-to-obsidian.git"
+  },
+  "keywords": [
+    "obsidian"
+  ],
+  "author": "Stefan Gojan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hoschi/neuron-to-obsidian/issues"
+  },
+  "homepage": "https://github.com/hoschi/neuron-to-obsidian#readme"
+}
