@@ -9,23 +9,22 @@ const doit = [
     },
 ]
 
-const nameMapping = {
-    fa123: 'solaranlage',
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // init
 ////////////////////////////////////////////////////////////////////////////////
 let problems = []
+const nameMapping = {}
 
 ////////////////////////////////////////////////////////////////////////////////
 // helper
 ////////////////////////////////////////////////////////////////////////////////
 
-const getContent = (fName) => ['line1', 'line2']
-
 const logUnary = R.unary(console.log)
 const isNotNil = R.complement(R.isNil)
+const emptyToUndefined = R.ifElse(R.isEmpty, R.always(undefined), R.identity)
+
+const getContent = (fName) => ['line1', 'line2']
+const getFirstHeading = R.pipe(R.filter(R.startsWith('#')), emptyToUndefined)
 
 ////////////////////////////////////////////////////////////////////////////////
 // process
@@ -33,7 +32,7 @@ const isNotNil = R.complement(R.isNil)
 
 // all files: create new file name `newName` by sanetizing heading
 console.log(`compute new file names`)
-const filesWithNewNames = R.filter(
+R.filter(
     isNotNil,
     files.map((file) => {
         const nextFile = {
@@ -43,12 +42,18 @@ const filesWithNewNames = R.filter(
         const firstHeading = getFirstHeading(getContent(file.name))
 
         if (!firstHeading) {
-            console.log(`        no first heading found!`)
+            const problem = 'no first heading found!'
+            console.log(`        ${problem}`)
+            problems.push({
+                ...nextFile,
+                problem,
+            })
             return undefined
         }
 
         const newName = firstHeading.toLowerCase() // TODO and other shit
         console.log(`        => ${newName}`)
+        nameMapping[file.name] = newName
         return {
             ...nextFile,
             newName,
@@ -56,7 +61,7 @@ const filesWithNewNames = R.filter(
     })
 )
 
-//
+// replace hierarchy and links
 
 //
 
