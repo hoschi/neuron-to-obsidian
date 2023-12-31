@@ -1,4 +1,5 @@
 import * as R from 'ramda'
+import { replaceInFileSync } from 'replace-in-file'
 
 const files = []
 
@@ -8,12 +9,21 @@ const doit = [
         newName: 'solaranlage.md',
     },
 ]
+////////////////////////////////////////////////////////////////////////////////
+// cleanup
+////////////////////////////////////////////////////////////////////////////////
+console.log(`
+Make sure:
+* all files within 'neu/' don't have links with <hash> in it, they don't get resolved
+* all links within 'neu/' are already in the Obsidian format
+* install and configure YAML plugin to put the "date created" into "date" instead to match the current files https://platers.github.io/obsidian-linter/settings/yaml-rules/#yaml-timestamp
+`)
 
 ////////////////////////////////////////////////////////////////////////////////
 // init
 ////////////////////////////////////////////////////////////////////////////////
 let problems = []
-const nameMapping = {}
+const fileMap = {}
 
 ////////////////////////////////////////////////////////////////////////////////
 // helper
@@ -32,40 +42,63 @@ const getFirstHeading = R.pipe(R.filter(R.startsWith('#')), emptyToUndefined)
 
 // all files: create new file name `newName` by sanetizing heading
 console.log(`compute new file names`)
-R.filter(
-    isNotNil,
-    files.map((file) => {
-        const nextFile = {
-            currentName: file.name,
-        }
-        console.log(`    ${file.name}`)
-        const firstHeading = getFirstHeading(getContent(file.name))
+files.forEach((inputFile) => {
+    console.log(`    ${inputFile.name}`)
+    const content = getContent(inputFile.name)
+    const nextFile = {
+        currentName: inputFile.name,
+        hash: input,
+    }
+    const firstHeading = getFirstHeading(content)
 
-        if (!firstHeading) {
-            const problem = 'no first heading found!'
-            console.log(`        ${problem}`)
-            problems.push({
-                ...nextFile,
-                problem,
-            })
-            return undefined
-        }
-
-        const newName = firstHeading.toLowerCase() // TODO and other shit
-        console.log(`        => ${newName}`)
-        nameMapping[file.name] = newName
-        return {
+    if (!firstHeading) {
+        const problem = 'no first heading found!'
+        console.log(`        ${problem}`)
+        problems.push({
             ...nextFile,
-            newName,
-        }
-    })
-)
+            problem,
+        })
+        return undefined
+    }
+
+    const newName = firstHeading.toLowerCase() // TODO and other shit
+    console.log(`        => ${newName}`)
+    fileMap[nextFile.currentName] = {
+        ...nextFile,
+        newName,
+        newNameWithExtension: `${newName}.md`,
+    }
+})
 
 // replace hierarchy and links
+const fileNames = R.keys(fileMap)
+console.log(`compute new file names`)
+R.forEach((currentName) => {
+    const file = fileMap(currentName)
+    console.log(`    ${file.newName} (${file.currentName})`)
 
-//
+    try {
+        const plainResults = replaceInFileSync({
+            files: fileNames,
+            from: [new RegExp(`<${file.hash}>`, 'g'), new RegExp(`<${file.hash}?cf>`, 'g')],
+            to: [`[[${file.newName}]]`, `down:: [[${file.newName}]]`],
+        })
+        R.pipe(
+            R.filter(R.propEq('hasChanged', true)),
+            R.map(
+                ({ file: fName, numMatches, numReplacements }) =>
+                    `        ${fName} with ${numMatches}/${numReplacements} changes`
+            ),
+            R.forEach(logUnary)
+        )(plainResults)
+    } catch (ex) {
+        console.log(`        rif error: `, ex)
+    }
+}, R.keys(fileMap))
 
-//
+// TODO do I need to do something with tags?
+
+// TODO is it worth to replace links in `neu` automatically or is it easier to do it manually
 
 //
 
