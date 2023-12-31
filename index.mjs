@@ -1,4 +1,4 @@
-console.log('hello world')
+import * as R from 'ramda'
 
 const files = []
 
@@ -24,33 +24,37 @@ let problems = []
 
 const getContent = (fName) => ['line1', 'line2']
 
-const logUnary = (a) => console.log(a)
+const logUnary = R.unary(console.log)
+const isNotNil = R.complement(R.isNil)
 
 ////////////////////////////////////////////////////////////////////////////////
 // process
 ////////////////////////////////////////////////////////////////////////////////
 
 // all files: create new file name `newName` by sanetizing heading
-doit = files.map((file) => {
-    const nextFile = {
-        currentName: file.name,
-    }
-    const newName = file.name.toLowerCase() // TODO and other shit
-    const firstHeading = getFirstHeading()
+console.log(`compute new file names`)
+const filesWithNewNames = R.filter(
+    isNotNil,
+    files.map((file) => {
+        const nextFile = {
+            currentName: file.name,
+        }
+        console.log(`    ${file.name}`)
+        const firstHeading = getFirstHeading(getContent(file.name))
 
-    if (!firstHeading) {
-        problems.push({
+        if (!firstHeading) {
+            console.log(`        no first heading found!`)
+            return undefined
+        }
+
+        const newName = firstHeading.toLowerCase() // TODO and other shit
+        console.log(`        => ${newName}`)
+        return {
             ...nextFile,
-            problem: 'no first heading',
-        })
-        return undefined
-    }
-
-    return {
-        ...nextFile,
-        newName,
-    }
-})
+            newName,
+        }
+    })
+)
 
 //
 
