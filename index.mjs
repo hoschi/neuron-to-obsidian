@@ -35,6 +35,15 @@ const emptyToUndefined = R.ifElse(R.isEmpty, R.always(undefined), R.identity)
 
 const getContent = (fName) => ['line1', 'line2']
 const getFirstHeading = R.pipe(R.filter(R.startsWith('#')), emptyToUndefined)
+const replace = R.pipe(
+    replaceInFileSync,
+    R.filter(R.propEq('hasChanged', true)),
+    R.map(
+        ({ file: fName, numMatches, numReplacements }) =>
+            `        ${fName} with ${numMatches}/${numReplacements} changes`
+    ),
+    R.forEach(logUnary)
+)
 
 ////////////////////////////////////////////////////////////////////////////////
 // process
@@ -78,19 +87,17 @@ R.forEach((currentName) => {
     console.log(`    ${file.newName} (${file.currentName})`)
 
     try {
-        const plainResults = replaceInFileSync({
+        replace({
+            files: fileNames,
+            // eslint-disable-next-line no-useless-escape
+            from: new RegExp(`^\s*\S\s<${file.hash}?cf>`, 'g'),
+            to: `down:: [[${file.newName}]]`,
+        })
+        replace({
             files: fileNames,
             from: [new RegExp(`<${file.hash}>`, 'g'), new RegExp(`<${file.hash}?cf>`, 'g')],
-            to: [`[[${file.newName}]]`, `down:: [[${file.newName}]]`],
+            to: [`[[${file.newName}]]`, `(down:: [[${file.newName}]])`],
         })
-        R.pipe(
-            R.filter(R.propEq('hasChanged', true)),
-            R.map(
-                ({ file: fName, numMatches, numReplacements }) =>
-                    `        ${fName} with ${numMatches}/${numReplacements} changes`
-            ),
-            R.forEach(logUnary)
-        )(plainResults)
     } catch (ex) {
         console.log(`        rif error: `, ex)
     }
