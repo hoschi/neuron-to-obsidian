@@ -1,14 +1,14 @@
+/* global cd, glob, fs */
 import * as R from 'ramda'
-import { replaceInFileSync } from 'replace-in-file'
+import replaceInFile from 'replace-in-file'
+const { replaceInFileSync } = replaceInFile
+import 'zx/globals'
 
-const files = []
+cd(`/Users/hoschi/repos/zettelkasten/`)
 
-const doit = [
-    {
-        currentName: 'fa123.md',
-        newName: 'solaranlage.md',
-    },
-]
+// FIXME find all .md files in the dir INPUT_DIR
+const files = await glob('*.md')
+
 ////////////////////////////////////////////////////////////////////////////////
 // cleanup
 ////////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ const logUnary = R.unary(console.log)
 const isNotNil = R.complement(R.isNil)
 const emptyToUndefined = R.ifElse(R.isEmpty, R.always(undefined), R.identity)
 
-const getContent = (fName) => ['line1', 'line2']
+const getContent = (fName) => fs.readFile(fName, 'utf8')
 const getFirstHeading = R.pipe(R.filter(R.startsWith('#')), emptyToUndefined)
 const removeFileExtensionMd = R.pipe(R.splitAt(-3), R.head)
 const replace = R.pipe(
@@ -70,7 +70,7 @@ files.forEach((inputFile) => {
         return undefined
     }
 
-    const newName = firstHeading.toLowerCase() // TODO and other shit
+    const newName = firstHeading.toLowerCase() // FIXME and other shit
     console.log(`        => ${newName}`)
     fileMap[nextFile.currentName] = {
         ...nextFile,
