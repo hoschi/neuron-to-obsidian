@@ -110,12 +110,12 @@ R.forEach((currentName) => {
         replace({
             files: fileNames,
             // eslint-disable-next-line no-useless-escape
-            from: new RegExp(`^\s*\S\s<${file.hash}?cf>`, 'g'),
-            to: `down:: [[${file.newName}]]`,
+            from: new RegExp(`\n(\\s*)\\S\\s<${file.hash}\\?cf>`, 'g'),
+            to: `\n$1* down:: [[${file.newName}]]`,
         })
         replace({
             files: fileNames,
-            from: [new RegExp(`<${file.hash}>`, 'g'), new RegExp(`<${file.hash}?cf>`, 'g')],
+            from: [new RegExp(`<${file.hash}>`, 'g'), new RegExp(`<${file.hash}\\?cf>`, 'g')],
             to: [`[[${file.newName}]]`, `(down:: [[${file.newName}]])`],
         })
     } catch (ex) {
