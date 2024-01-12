@@ -3,11 +3,11 @@ import * as R from 'ramda'
 import replaceInFile from 'replace-in-file'
 const { replaceInFileSync } = replaceInFile
 import 'zx/globals'
+import isValidFilename from 'valid-filename'
 
 cd(`/Users/hoschi/repos/zettelkasten/`)
 
-// FIXME find all .md files in the dir INPUT_DIR
-const files = await glob('*.md')
+const files = R.take(1, await glob('*.md'))
 
 ////////////////////////////////////////////////////////////////////////////////
 // cleanup
@@ -32,8 +32,8 @@ const logUnary = R.unary(console.log)
 const isNotNil = R.complement(R.isNil)
 const emptyToUndefined = R.ifElse(R.isEmpty, R.always(undefined), R.identity)
 
-const getContent = (fName) => fs.readFile(fName, 'utf8')
-const getFirstHeading = R.pipe(R.filter(R.startsWith('#')), emptyToUndefined)
+const getContent = (fName) => fs.readFileSync(fName, 'utf8').toString().split('\n')
+const getFirstHeading = R.pipe(R.filter(R.startsWith('#')), R.head, emptyToUndefined)
 const removeFileExtensionMd = R.pipe(R.splitAt(-3), R.head)
 const replace = R.pipe(
     replaceInFileSync,
@@ -70,8 +70,18 @@ files.forEach((fName) => {
         return undefined
     }
 
-    const newName = firstHeading.toLowerCase() // FIXME and other shit
+    const newName = R.pipe(R.tail, R.trim, R.toLower, R.replace(/(:|\\|\/)/g, '-'))(firstHeading)
     console.log(`        => ${newName}`)
+    if (!isValidFilename(newName)) {
+        const problem = `no valid file name: "${newName}"`
+        console.log(`        ${problem}`)
+        problems.push({
+            ...nextFile,
+            problem,
+        })
+        return undefined
+    }
+
     fileMap[nextFile.currentName] = {
         ...nextFile,
         newName,
