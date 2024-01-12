@@ -5,9 +5,11 @@ const { replaceInFileSync } = replaceInFile
 import 'zx/globals'
 import isValidFilename from 'valid-filename'
 
-cd(`/Users/hoschi/repos/zettelkasten/`)
+//cd(`/Users/hoschi/repos/zettelkasten/`)
+cd(`./test`)
 
-const files = R.take(1, await glob('*.md'))
+//const files = R.take(5, await glob('*.md'))
+const files = await glob('*.md')
 
 ////////////////////////////////////////////////////////////////////////////////
 // cleanup
@@ -49,7 +51,6 @@ const replace = R.pipe(
 // process
 ////////////////////////////////////////////////////////////////////////////////
 
-// all files: create new file name `newName` by sanetizing heading
 console.log(`compute new file names`)
 files.forEach((fName) => {
     console.log(`    ${fName}`)
@@ -82,6 +83,16 @@ files.forEach((fName) => {
         return undefined
     }
 
+    if (fileMap[newName]) {
+        const problem = `file already in map`
+        console.log(`        ${problem}`)
+        problems.push({
+            ...nextFile,
+            problem,
+        })
+        return undefined
+    }
+
     fileMap[nextFile.currentName] = {
         ...nextFile,
         newName,
@@ -89,11 +100,10 @@ files.forEach((fName) => {
     }
 })
 
-// replace hierarchy and links
 const fileNames = R.keys(fileMap)
-console.log(`compute new file names`)
+console.log(`replace hierachy and links`)
 R.forEach((currentName) => {
-    const file = fileMap(currentName)
+    const file = fileMap[currentName]
     console.log(`    ${file.newName} (${file.currentName})`)
 
     try {
