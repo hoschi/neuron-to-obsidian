@@ -14,9 +14,8 @@ const doit = [
 ////////////////////////////////////////////////////////////////////////////////
 console.log(`
 Make sure:
-* all files within 'neu/' don't have links with <hash> in it, they don't get resolved
-* all links within 'neu/' are already in the Obsidian format
-* install and configure YAML plugin to put the "date created" into "date" instead to match the current files https://platers.github.io/obsidian-linter/settings/yaml-rules/#yaml-timestamp
+* all files within 'neu/' don't have links with <hash> in it, they don't get resolved. Instead all links should already be in the Obsidian format.
+* install and configure YAML plugin to put the "date created" into "date" to match the current files https://platers.github.io/obsidian-linter/settings/yaml-rules/#yaml-timestamp
 `)
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,6 +34,7 @@ const emptyToUndefined = R.ifElse(R.isEmpty, R.always(undefined), R.identity)
 
 const getContent = (fName) => ['line1', 'line2']
 const getFirstHeading = R.pipe(R.filter(R.startsWith('#')), emptyToUndefined)
+const removeFileExtensionMd = R.pipe(R.splitAt(-3), R.head)
 const replace = R.pipe(
     replaceInFileSync,
     R.filter(R.propEq('hasChanged', true)),
@@ -56,7 +56,7 @@ files.forEach((inputFile) => {
     const content = getContent(inputFile.name)
     const nextFile = {
         currentName: inputFile.name,
-        hash: input,
+        hash: removeFileExtensionMd(inputFile.name),
     }
     const firstHeading = getFirstHeading(content)
 
