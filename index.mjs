@@ -73,43 +73,46 @@ files.forEach((fName) => {
     }
 
     const newName = R.pipe(R.tail, R.trim, R.toLower, R.replace(/(:|\\|\/)/g, '-'))(firstHeading)
-    const newNameWithExtension= `${newName}.md`
+    const newNameWithExtension = `${newName}.md`
     console.log(`        => ${newName}`)
-    if (!isValidFilename(newName)) {
-        const problem = `no valid file name: "${newName}"`
-        console.log(`        ${problem}`)
-        problems.push({
-            ...nextFile,
-            problem,
-        })
-        return undefined
+    const check = (pred) => (lastValue) => {
+        if (!lastValue) {
+            return lastValue
+        }
+        const problem = pred()
+        if (problem) {
+            console.log(`        ${problem}`)
+            problems.push({
+                ...nextFile,
+                problem,
+                newName,
+                newNameWithExtension,
+            })
+            return undefined
+        } else {
+            return problem
+        }
     }
 
-    if (fileMap[newName]) {
-        const problem = `file already in map`
-        console.log(`        ${problem}`)
-        problems.push({
-            ...nextFile,
-            problem,
+    R.pipe(
+        check(() => !isValidFilename(newName) && `no valid file name: "${newName}"`),
+        check(() => fileMap[newName] && `file already in map`),
+        check(
+            () =>
+                fs.existsSync(
+                    path.join(`/Users/hoschi/Dropbox/obsidian-test/test/`, newNameWithExtension)
+                ) && `file already exists in Obsidian`
+        ),
+        //check(() => ),
+        check(() => {
+            fileMap[nextFile.currentName] = {
+                ...nextFile,
+                newName,
+                newNameWithExtension,
+            }
+            return true
         })
-        return undefined
-    }
-
-    if (fs.existsSync(path.join(`/Users/hoschi/Dropbox/obsidian-test/test/`, newNameWithExtension))) {
-        const problem = `file already exists in Obsidian`
-        console.log(`        ${problem}`)
-        problems.push({
-            ...nextFile,
-            problem,
-        })
-        return undefined
-    }
-
-    fileMap[nextFile.currentName] = {
-        ...nextFile,
-        newName,
-        newNameWithExtension,
-    }
+    )(true)
 })
 
 const fileNames = R.keys(fileMap)
