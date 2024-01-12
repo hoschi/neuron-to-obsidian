@@ -1,4 +1,4 @@
-/* global cd, glob, fs */
+/* global cd, glob, fs, path */
 import * as R from 'ramda'
 import replaceInFile from 'replace-in-file'
 const { replaceInFileSync } = replaceInFile
@@ -73,6 +73,7 @@ files.forEach((fName) => {
     }
 
     const newName = R.pipe(R.tail, R.trim, R.toLower, R.replace(/(:|\\|\/)/g, '-'))(firstHeading)
+    const newNameWithExtension= `${newName}.md`
     console.log(`        => ${newName}`)
     if (!isValidFilename(newName)) {
         const problem = `no valid file name: "${newName}"`
@@ -94,10 +95,20 @@ files.forEach((fName) => {
         return undefined
     }
 
+    if (fs.existsSync(path.join(`/Users/hoschi/Dropbox/obsidian-test/test/`, newNameWithExtension))) {
+        const problem = `file already exists in Obsidian`
+        console.log(`        ${problem}`)
+        problems.push({
+            ...nextFile,
+            problem,
+        })
+        return undefined
+    }
+
     fileMap[nextFile.currentName] = {
         ...nextFile,
         newName,
-        newNameWithExtension: `${newName}.md`,
+        newNameWithExtension,
     }
 })
 
