@@ -51,12 +51,12 @@ const replace = R.pipe(
 
 // all files: create new file name `newName` by sanetizing heading
 console.log(`compute new file names`)
-files.forEach((inputFile) => {
-    console.log(`    ${inputFile.name}`)
-    const content = getContent(inputFile.name)
+files.forEach((fName) => {
+    console.log(`    ${fName}`)
+    const content = getContent(fName)
     const nextFile = {
-        currentName: inputFile.name,
-        hash: removeFileExtensionMd(inputFile.name),
+        currentName: fName,
+        hash: removeFileExtensionMd(fName),
     }
     const firstHeading = getFirstHeading(content)
 
