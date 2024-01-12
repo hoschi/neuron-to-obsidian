@@ -16,7 +16,7 @@ const files = await glob('*.md')
 ////////////////////////////////////////////////////////////////////////////////
 console.log(`
 Make sure:
-* all files within 'neu/' don't have links with <hash> in it, they don't get resolved. Instead all links should already be in the Obsidian format.
+* all files within 'neu/' don't have links with <hash> in it, they don't get resolved. Instead all links should already be in the Obsidian format. Search for angle bracket links with \`rg '<[a-zA-Z]+'\`
 * install and configure YAML plugin to put the "date created" into "date" to match the current files https://platers.github.io/obsidian-linter/settings/yaml-rules/#yaml-timestamp
 `)
 
@@ -38,8 +38,9 @@ const getContent = (fName) => fs.readFileSync(fName, 'utf8').toString().split('\
 const getFirstHeading = R.pipe(R.filter(R.startsWith('#')), R.head, emptyToUndefined)
 const removeFileExtensionMd = R.pipe(R.splitAt(-3), R.head)
 const replace = R.pipe(
+    R.assoc('countMatches', true),
     replaceInFileSync,
-    R.filter(R.propEq('hasChanged', true)),
+    R.filter(R.propEq(true, 'hasChanged')),
     R.map(
         ({ file: fName, numMatches, numReplacements }) =>
             `        ${fName} with ${numMatches}/${numReplacements} changes`
@@ -122,10 +123,6 @@ R.forEach((currentName) => {
         console.log(`        rif error: `, ex)
     }
 }, R.keys(fileMap))
-
-// TODO do I need to do something with tags?
-
-// TODO is it worth to replace links in `neu` automatically or is it easier to do it manually
 
 //
 
