@@ -4,9 +4,17 @@ import replaceInFile from 'replace-in-file'
 const { replaceInFileSync } = replaceInFile
 import 'zx/globals'
 import isValidFilename from 'valid-filename'
+import { stringSimilarity } from 'string-similarity-js'
+import { fileURLToPath } from 'url'
+
+const OBSIDIAN_VAULT = '/Users/hoschi/Dropbox/obsidian-test/test/'
+cd(OBSIDIAN_VAULT)
+const obsidianFiles = await glob('*.md')
 
 //cd(`/Users/hoschi/repos/zettelkasten/`)
-cd(`./test`)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+cd(`${__dirname}/test`)
 
 //const files = R.take(5, await glob('*.md'))
 const files = await glob('*.md')
@@ -99,10 +107,17 @@ files.forEach((fName) => {
         check(() => fileMap[newName] && `file already in map`),
         check(
             () =>
-                fs.existsSync(
-                    path.join(`/Users/hoschi/Dropbox/obsidian-test/test/`, newNameWithExtension)
-                ) && `file already exists in Obsidian`
+                fs.existsSync(path.join(OBSIDIAN_VAULT, newNameWithExtension)) &&
+                `file already exists in Obsidian`
         ),
+        check(() => {
+            const similiarFiles = R.map(
+                (oFile) => stringSimilarity(newNameWithExtension, oFile),
+                obsidianFiles
+            )
+            console.log(similiarFiles)
+            return `blubs`
+        }),
         //check(() => ),
         check(() => {
             fileMap[nextFile.currentName] = {
@@ -114,6 +129,12 @@ files.forEach((fName) => {
         })
     )(true)
 })
+
+if (problems.length > 0) {
+    console.log('********************ABORTED!********************')
+    problems.forEach(logUnary)
+    process.exit(1)
+}
 
 const fileNames = R.keys(fileMap)
 console.log(`replace hierachy and links`)

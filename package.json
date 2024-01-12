@@ -4,7 +4,7 @@
   "description": "Convert neuron zettelkasten to obsidian",
   "main": "src/index.js",
   "scripts": {
-    "test": "rm -rf test/*.md; cp -a template/*.md test/; node index.mjs; cat test/*.md"
+    "test": "rm -rf test/*.md; cp -a template/*.md test/; node index.mjs && cat test/*.md"
   },
   "repository": {
     "type": "git",
