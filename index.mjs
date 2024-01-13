@@ -4,12 +4,14 @@ import replaceInFile from 'replace-in-file'
 const { replaceInFileSync } = replaceInFile
 import 'zx/globals'
 import isValidFilename from 'valid-filename'
-
-const OBSIDIAN_VAULT = '/Users/hoschi/Dropbox/obsidian-test/test/'
+import { stringSimilarity } from 'string-similarity-js'
 
 const neuronVault = path.resolve(argv._[0])
-cd(neuronVault)
+const OBSIDIAN_VAULT = '/Users/hoschi/Dropbox/obsidian-test/test/'
+cd(OBSIDIAN_VAULT)
+const obsidianFiles = await glob('*.md')
 
+cd(neuronVault)
 //const files = R.take(5, await glob('*.md'))
 const files = await glob('*.md')
 
@@ -62,7 +64,7 @@ console.log(`compute new file names`)
 files.forEach((fName) => {
     console.log(`    ${fName}`)
     const content = getContent(fName)
-    const nextFile = {
+    let nextFile = {
         currentName: fName,
         hash: removeFileExtensionMd(fName),
     }
@@ -108,6 +110,26 @@ files.forEach((fName) => {
                 fs.existsSync(path.join(OBSIDIAN_VAULT, newNameWithExtension)) &&
                 `file already exists in Obsidian`
         ),
+
+        check(() => {
+            const similiarFiles = R.pipe(
+                R.map((oFile) => ({
+                    obsidianFile: oFile,
+                    count: stringSimilarity(newNameWithExtension, oFile),
+                })),
+                R.filter(R.propSatisfies((x) => x > 0.7, 'count')),
+                R.sort(R.descend(R.prop('count')))
+            )(obsidianFiles)
+
+            return (
+                similiarFiles.length &&
+                `simililar file aleardy exist?: ${R.pipe(
+                    R.pluck('obsidianFile'),
+                    R.join(', ')
+                )(similiarFiles)}`
+            )
+        }),
+
         //check(() => ),
         check(() => {
             fileMap[nextFile.currentName] = {
@@ -122,6 +144,7 @@ files.forEach((fName) => {
 
 if (problems.length > 0) {
     console.log('********************ABORTED!********************')
+    console.log(`Problems (${problems.length}):`)
     problems.forEach(logUnary)
     process.exit(1)
 }
@@ -148,11 +171,3 @@ R.forEach((currentName) => {
         console.log(`        rif error: `, ex)
     }
 }, R.keys(fileMap))
-
-//
-
-//
-
-// output problems
-console.log(`Problems (${problems.length}):`)
-problems.forEach(logUnary)
