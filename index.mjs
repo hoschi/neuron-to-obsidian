@@ -1,24 +1,20 @@
-/* global cd, glob, fs, path */
+/* global cd, glob, fs, path, argv */
 import * as R from 'ramda'
 import replaceInFile from 'replace-in-file'
 const { replaceInFileSync } = replaceInFile
 import 'zx/globals'
 import isValidFilename from 'valid-filename'
-import { stringSimilarity } from 'string-similarity-js'
-import { fileURLToPath } from 'url'
 
 const OBSIDIAN_VAULT = '/Users/hoschi/Dropbox/obsidian-test/test/'
-cd(OBSIDIAN_VAULT)
-const obsidianFiles = await glob('*.md')
 
-//cd(`/Users/hoschi/repos/zettelkasten/`)
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-cd(`${__dirname}/test`)
+const neuronVault = path.resolve(argv._[0])
+cd(neuronVault)
 
 //const files = R.take(5, await glob('*.md'))
 const files = await glob('*.md')
 
+// todo
+// - hab ich down richtig gemacht mit ?cf?
 ////////////////////////////////////////////////////////////////////////////////
 // cleanup
 ////////////////////////////////////////////////////////////////////////////////
@@ -26,6 +22,8 @@ console.log(`
 Make sure:
 * all files within 'neu/' don't have links with <hash> in it, they don't get resolved. Instead all links should already be in the Obsidian format. Search for angle bracket links with \`rg '<[a-zA-Z]+'\`
 * install and configure YAML plugin to put the "date created" into "date" to match the current files https://platers.github.io/obsidian-linter/settings/yaml-rules/#yaml-timestamp
+* search for \`rg '<z:zettels'\` and replace it with tag queries
+* switch back from special git branches to master and push
 `)
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,14 +108,6 @@ files.forEach((fName) => {
                 fs.existsSync(path.join(OBSIDIAN_VAULT, newNameWithExtension)) &&
                 `file already exists in Obsidian`
         ),
-        check(() => {
-            const similiarFiles = R.map(
-                (oFile) => stringSimilarity(newNameWithExtension, oFile),
-                obsidianFiles
-            )
-            console.log(similiarFiles)
-            return `blubs`
-        }),
         //check(() => ),
         check(() => {
             fileMap[nextFile.currentName] = {
@@ -146,13 +136,13 @@ R.forEach((currentName) => {
         replace({
             files: fileNames,
             // eslint-disable-next-line no-useless-escape
-            from: new RegExp(`\n(\\s*)\\S\\s<${file.hash}\\?cf>`, 'g'),
+            from: new RegExp(`\n(\\s*)\\S\\s<${file.hash}>`, 'g'),
             to: `\n$1* down:: [[${file.newName}]]`,
         })
         replace({
             files: fileNames,
             from: [new RegExp(`<${file.hash}>`, 'g'), new RegExp(`<${file.hash}\\?cf>`, 'g')],
-            to: [`[[${file.newName}]]`, `(down:: [[${file.newName}]])`],
+            to: [`(down:: [[${file.newName}]])`, `[[${file.newName}]]`],
         })
     } catch (ex) {
         console.log(`        rif error: `, ex)
