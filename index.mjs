@@ -22,10 +22,17 @@ const files = await glob('*.md')
 ////////////////////////////////////////////////////////////////////////////////
 console.log(`
 Make sure:
-* all files within 'neu/' don't have links with <hash> in it, they don't get resolved. Instead all links should already be in the Obsidian format. Search for angle bracket links with \`rg '<[a-zA-Z]+'\`
-* install and configure YAML plugin to put the "date created" into "date" to match the current files https://platers.github.io/obsidian-linter/settings/yaml-rules/#yaml-timestamp
 * search for \`rg '<z:zettels'\` and replace it with tag queries
-* switch back from special git branches to master and push
+* run script with \`npr real > output.txt\`
+* make commit in obsidian vault
+* Search for angle bracket links with \`rg '<[a-zA-Z]+'\` in 'neu/' and replace them according to the renamed file
+* copy all files from 'neu/' to the obsidian vault
+* make commit in obsidian vault
+* check hierarchy
+* make commit in obsidian vault
+* install and configure YAML plugin to put the "date created" into "date" to match the current files https://platers.github.io/obsidian-linter/settings/yaml-rules/#yaml-timestamp
+* make commit in obsidian vault
+* switch back from special git branches to master and push in obsidian vault
 `)
 
 ////////////////////////////////////////////////////////////////////////////////
