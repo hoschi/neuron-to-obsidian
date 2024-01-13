@@ -81,22 +81,22 @@ files.forEach((fName) => {
     const newName = R.pipe(R.tail, R.trim, R.toLower, R.replace(/(:|\\|\/)/g, '-'))(firstHeading)
     const newNameWithExtension = `${newName}.md`
     console.log(`        => ${newName}`)
-    const check = (pred) => (lastValue) => {
-        if (!lastValue) {
-            return lastValue
+    const check = (pred) => (lastWasProblem) => {
+        if (lastWasProblem) {
+            return lastWasProblem
         }
-        const problem = pred()
-        if (problem) {
-            console.log(`        ${problem}`)
+        const hasProblem = pred()
+        if (hasProblem) {
+            console.log(`        ${hasProblem}`)
             problems.push({
                 ...nextFile,
-                problem,
+                problem: hasProblem,
                 newName,
                 newNameWithExtension,
             })
-            return undefined
+            return true
         } else {
-            return problem
+            return false
         }
     }
 
@@ -115,9 +115,9 @@ files.forEach((fName) => {
                 newName,
                 newNameWithExtension,
             }
-            return true
+            return false
         })
-    )(true)
+    )(false)
 })
 
 if (problems.length > 0) {
