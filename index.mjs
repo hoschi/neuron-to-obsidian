@@ -39,7 +39,6 @@ const fileMap = {}
 ////////////////////////////////////////////////////////////////////////////////
 
 const logUnary = R.unary(console.log)
-const isNotNil = R.complement(R.isNil)
 const emptyToUndefined = R.ifElse(R.isEmpty, R.always(undefined), R.identity)
 
 const getContent = (fName) => fs.readFileSync(fName, 'utf8').toString().split('\n')
