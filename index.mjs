@@ -22,6 +22,7 @@ const files = await glob('*.md')
 ////////////////////////////////////////////////////////////////////////////////
 console.log(`
 Make sure:
+* enable simililar name checking below, see TODO
 * search for \`rg '<z:zettels'\` and replace it with tag queries
 * run script with \`npr real > output.txt\`
 * make commit in obsidian vault
@@ -30,7 +31,7 @@ Make sure:
 * make commit in obsidian vault
 * check hierarchy
 * make commit in obsidian vault
-* install and configure YAML plugin to put the "date created" into "date" to match the current files https://platers.github.io/obsidian-linter/settings/yaml-rules/#yaml-timestamp
+* install and configure YAML plugin to put the "date created" in all missing files https://platers.github.io/obsidian-linter/settings/yaml-rules/#yaml-timestamp
 * make commit in obsidian vault
 * switch back from special git branches to master and push in obsidian vault
 `)
@@ -123,7 +124,9 @@ files.forEach((fName) => {
                     obsidianFile: oFile,
                     count: stringSimilarity(newNameWithExtension, oFile),
                 })),
-                R.filter(R.propSatisfies((x) => x > 0.7, 'count')),
+                // TODO disabled after all looked through
+                R.filter(R.propSatisfies((x) => x > 1, 'count')),
+                //R.filter(R.propSatisfies((x) => x > 0.7, 'count')),
                 R.sort(R.descend(R.prop('count')))
             )(obsidianFiles)
 
