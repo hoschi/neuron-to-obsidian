@@ -179,4 +179,16 @@ R.forEach((currentName) => {
     } catch (ex) {
         console.log(`        rif error: `, ex)
     }
-}, R.keys(fileMap))
+}, fileNames)
+
+console.log(`copy files over to new location`)
+Promise.all(
+    R.map((currentName) => {
+        const file = fileMap[currentName]
+        return fs.copy(
+            path.join(neuronVault, file.currentName),
+            path.join(OBSIDIAN_VAULT, file.newNameWithExtension),
+            { preserveTimestamps: true }
+        )
+    }, fileNames)
+)
