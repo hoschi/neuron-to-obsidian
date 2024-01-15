@@ -26,8 +26,9 @@ Make sure:
 * search for \`rg '<z:zettels'\` and replace it with tag queries
 * run script with \`npr real > output.txt\`
 * make commit in obsidian vault
-* Search for angle bracket links with \`rg '<[a-zA-Z]+'\` in 'neu/' and replace them according to the renamed file
 * copy all files from 'neu/' to the obsidian vault
+* check with \`git status\` for changed files, restore them and merge manually!
+* Search for angle bracket links with \`rg '<[a-zA-Z]+'\` in 'neu/' and replace them according to the renamed file
 * make commit in obsidian vault
 * check hierarchy
 * make commit in obsidian vault
